@@ -10,3 +10,4 @@ pillow
 googletrans
 flask_gzip
 mtranslate
+nltk
