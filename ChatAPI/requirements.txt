@@ -11,3 +11,4 @@ googletrans
 flask_gzip
 mtranslate
 nltk
+gevent
