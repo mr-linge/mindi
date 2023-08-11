@@ -653,19 +653,19 @@ if __name__ == '__main__':
 
     # app.config['SSL_CONTEXT'] = ("server/server-cert.crt", "server/server-key.key")
 
-    from gevent import pywsgi
-    import ssl
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_TLSv1_2
-    context.load_cert_chain('server/server-cert.crt','server/server-key.key')
-    app.debug = True
-    server = pywsgi.WSGIServer(('0.0.0.0', 443), app, ssl_context=context)
-    server.serve_forever()
+    # from gevent import pywsgi
+    # import ssl
+    # context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    # context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_TLSv1_2
+    # context.load_cert_chain('server/server-cert.crt','server/server-key.key')
+    # app.debug = True
+    # server = pywsgi.WSGIServer(('0.0.0.0', 443), app, ssl_context=context)
+    # server.serve_forever()
 
-    # app.run(host="0.0.0.0", port=443)
-    # app.run(host="0.0.0.0", port=443,ssl_context=(
-    #     "server/server-cert.crt",
-    #     "server/server-key.key")
-    # )
+    app.run(host="0.0.0.0", port=443)
+    app.run(host="0.0.0.0", port=443,ssl_context=(
+        "server/server-cert.crt",
+        "server/server-key.key")
+    )
 
 
