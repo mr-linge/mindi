@@ -291,10 +291,9 @@ def api():
 
     try:
         # from pygtrans import Translate
-        from mtranslate import translate
-        text = translate(question, 'en')
-
-        print(text)
+        # from mtranslate import translate
+        # text = translate(question, 'en')
+        text = question
         # print(text.translatedText)
         # assert  == 'お知らせ下さい'
         # 使用Spacy进行分词
