@@ -297,22 +297,22 @@ def api():
         # print(text.translatedText)
         # assert  == 'お知らせ下さい'
         # 使用Spacy进行分词
-        tokens = nltk.word_tokenize(text)
+        # tokens = nltk.word_tokenize(text)
         # print(tokens)
 
         consumption_time[str(task_uuid)] = 30
 
-        mycheck = False
-        for j in tokens:
-            for t in productType_list:
-                if t.lower().replace("s",'') == j.lower().replace("s",'') and j.lower().replace("s",'') == productType.lower().replace("s",''):
-                    mycheck = True
-
-        if mycheck == False:
-            return jsonify({
-                "statu": False,
-                'message': 'Category corresponding error or no such category. Please re-enter or re-choose.'
-            })
+        # mycheck = False
+        # for j in tokens:
+        #     for t in productType_list:
+        #         if t.lower().replace("s",'') == j.lower().replace("s",'') and j.lower().replace("s",'') == productType.lower().replace("s",''):
+        #             mycheck = True
+        #
+        # if mycheck == False:
+        #     return jsonify({
+        #         "statu": False,
+        #         'message': 'Category corresponding error or no such category. Please re-enter or re-choose.'
+        #     })
 
         # 从请求中获取关键词参数
         flag = request.args.get('flag', 0)
