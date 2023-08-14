@@ -28,6 +28,7 @@ class Sender:
         self.version = params['version']
         self.id = params['id']
         self.flags = params['flags']
+        self.timeout = 10
         
         
     def send(self, prompt):
@@ -48,11 +49,13 @@ class Sender:
             'attachments': []}
             }
         
-        r = httpx.post('https://discord.com/api/v9/interactions', json = payload , headers = header)
+        r = httpx.post('https://discord.com/api/v9/interactions', json = payload , headers = header,timeout=self.timeout)
+
+        print(r.status_code)
 
         while r.status_code != 204:
 
-            r = httpx.post('https://discord.com/api/v9/interactions', json = payload , headers = header)
+            r = httpx.post('https://discord.com/api/v9/interactions', json = payload , headers = header,timeout=self.timeout)
 
         # print(r.text)
 
