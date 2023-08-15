@@ -289,124 +289,124 @@ def api():
         })
     request_in_progress[available_thread_index] = True
 
-    try:
+    # try:
         # from pygtrans import Translate
         # from mtranslate import translate
         # text = translate(question, 'en')
-        text = question
-        # print(text.translatedText)
-        # assert  == 'お知らせ下さい'
-        # 使用Spacy进行分词
-        # tokens = nltk.word_tokenize(text)
-        # print(tokens)
+    text = question
+    # print(text.translatedText)
+    # assert  == 'お知らせ下さい'
+    # 使用Spacy进行分词
+    # tokens = nltk.word_tokenize(text)
+    # print(tokens)
 
-        consumption_time[str(task_uuid)] = 30
+    consumption_time[str(task_uuid)] = 30
 
-        # mycheck = False
-        # for j in tokens:
-        #     for t in productType_list:
-        #         if t.lower().replace("s",'') == j.lower().replace("s",'') and j.lower().replace("s",'') == productType.lower().replace("s",''):
-        #             mycheck = True
-        #
-        # if mycheck == False:
-        #     return jsonify({
-        #         "statu": False,
-        #         'message': 'Category corresponding error or no such category. Please re-enter or re-choose.'
-        #     })
+    # mycheck = False
+    # for j in tokens:
+    #     for t in productType_list:
+    #         if t.lower().replace("s",'') == j.lower().replace("s",'') and j.lower().replace("s",'') == productType.lower().replace("s",''):
+    #             mycheck = True
+    #
+    # if mycheck == False:
+    #     return jsonify({
+    #         "statu": False,
+    #         'message': 'Category corresponding error or no such category. Please re-enter or re-choose.'
+    #     })
 
-        # 从请求中获取关键词参数
-        flag = request.args.get('flag', 0)
-        custom_content = ", Please add a prompt that the generated images need to be produced by the factory as much as possible, not just imagined"
-        prompt = str(text)
-        sender = Sender(params, available_thread_index, flag)
-        print("发送成功！")
-        sender.send(prompt)
+    # 从请求中获取关键词参数
+    flag = request.args.get('flag', 0)
+    custom_content = ", Please add a prompt that the generated images need to be produced by the factory as much as possible, not just imagined"
+    prompt = str(text)
+    sender = Sender(params, available_thread_index, flag)
+    print("发送成功！")
+    sender.send(prompt)
 
-        # 使用 Receiver 类接收图片 URL
-        receiver = Receiver(params, available_thread_index)
+    # 使用 Receiver 类接收图片 URL
+    receiver = Receiver(params, available_thread_index)
+    receiver.collecting_results()
+
+    initial_image_timestamp = receiver.latest_image_timestamp
+
+    consumption_time[str(task_uuid)] = 55
+
+    # 设置最大等待时间
+    max_wait_time = 300  # 最大等待时间，单位为秒
+
+    # 创建一个定时器，在最大等待时间后重置request_in_progress标志
+    timeout_timer = threading.Timer(max_wait_time, reset_request_in_progress, args=(available_thread_index,))
+    timeout_timer.start()
+
+    # 等待新图片出现
+    wait_time = 0
+    while wait_time < max_wait_time:
+
         receiver.collecting_results()
-
-        initial_image_timestamp = receiver.latest_image_timestamp
-
-        consumption_time[str(task_uuid)] = 55
-
-        # 设置最大等待时间
-        max_wait_time = 300  # 最大等待时间，单位为秒
-
-        # 创建一个定时器，在最大等待时间后重置request_in_progress标志
-        timeout_timer = threading.Timer(max_wait_time, reset_request_in_progress, args=(available_thread_index,))
-        timeout_timer.start()
-
-        # 等待新图片出现
-        wait_time = 0
-        while wait_time < max_wait_time:
-
-            receiver.collecting_results()
-            current_image_timestamp = receiver.latest_image_timestamp
-
-            if current_image_timestamp and current_image_timestamp > initial_image_timestamp:
-                # 发现新图片，跳出循环
-                timeout_timer.cancel()  # 取消定时器
-                break
-
-            # 等待一段时间
-            time.sleep(1)
-            wait_time += 1
-            if consumption_time[str(task_uuid)]<90:
-                consumption_time[str(task_uuid)] = consumption_time[str(task_uuid)]+1
-
+        current_image_timestamp = receiver.latest_image_timestamp
 
         if current_image_timestamp and current_image_timestamp > initial_image_timestamp:
-            latest_image_id = receiver.df.index[-1]
-            latest_image_url = receiver.df.loc[latest_image_id].url
-            latest_filename = receiver.df.loc[latest_image_id].filename
+            # 发现新图片，跳出循环
+            timeout_timer.cancel()  # 取消定时器
+            break
 
-            # cdn = user_send.get('cdn', False)
-            # print(cdn)
-            # if cdn == True:
+        # 等待一段时间
+        time.sleep(1)
+        wait_time += 1
+        if consumption_time[str(task_uuid)]<90:
+            consumption_time[str(task_uuid)] = consumption_time[str(task_uuid)]+1
 
-            image_filename = download_image(latest_image_url)
-            latest_image_url = f"/static/{image_filename}"
 
-            conn = sqlite3.connect('images.db')
-            c = conn.cursor()
-            c.execute(
-                "INSERT OR REPLACE INTO images (message_id, url, filename,email,productType,thread_index) VALUES (?, ?, ?, ?, ?, ?)",
-                (latest_image_id, latest_image_url, latest_filename,username,productType,available_thread_index))
-            conn.commit()
-            conn.close()
+    if current_image_timestamp and current_image_timestamp > initial_image_timestamp:
+        latest_image_id = receiver.df.index[-1]
+        latest_image_url = receiver.df.loc[latest_image_id].url
+        latest_filename = receiver.df.loc[latest_image_id].filename
 
-            # 图片分割
-            # Split_Picture(image_filename)
+        # cdn = user_send.get('cdn', False)
+        # print(cdn)
+        # if cdn == True:
 
-            # 输出存储在数据库中的数据
-            print_stored_data()
+        image_filename = download_image(latest_image_url)
+        latest_image_url = f"/static/{image_filename}"
 
-        else:
-            latest_image_url = None
-        with request_in_progress_lock:
-            request_in_progress[available_thread_index] = False
-        # 将最新图片的URL作为响应返回
-        if timeout_error_message:
-            response = jsonify({"statu": False,'message': timeout_error_message})
-            timeout_error_message = None
-            return response
+        conn = sqlite3.connect('images.db')
+        c = conn.cursor()
+        c.execute(
+            "INSERT OR REPLACE INTO images (message_id, url, filename,email,productType,thread_index) VALUES (?, ?, ?, ?, ?, ?)",
+            (latest_image_id, latest_image_url, latest_filename,username,productType,available_thread_index))
+        conn.commit()
+        conn.close()
 
-        consumption_time[str(task_uuid)] = 100
-        # 模拟压缩过程，每秒增加进度百分比
-        # for i in range(1, 11):
-        #     time.sleep(1)
-        #     progress = i * 10
-        #     # 将进度发送给前端
-        #     return jsonify({'progress': progress})
-        consumption_time.pop(str(task_uuid))
+        # 图片分割
+        # Split_Picture(image_filename)
 
-        return jsonify({'latest_image_url': latest_image_url,"statu": True,'message':"Successfully generated !"})
-    except Exception as e:
-        print(f"Error: {e}")
-        with request_in_progress_lock:
-            request_in_progress[available_thread_index] = False
-        return jsonify({'message': str(e),"statu": False})
+        # 输出存储在数据库中的数据
+        print_stored_data()
+
+    else:
+        latest_image_url = None
+    with request_in_progress_lock:
+        request_in_progress[available_thread_index] = False
+    # 将最新图片的URL作为响应返回
+    if timeout_error_message:
+        response = jsonify({"statu": False,'message': timeout_error_message})
+        timeout_error_message = None
+        return response
+
+    consumption_time[str(task_uuid)] = 100
+    # 模拟压缩过程，每秒增加进度百分比
+    # for i in range(1, 11):
+    #     time.sleep(1)
+    #     progress = i * 10
+    #     # 将进度发送给前端
+    #     return jsonify({'progress': progress})
+    consumption_time.pop(str(task_uuid))
+
+    return jsonify({'latest_image_url': latest_image_url,"statu": True,'message':"Successfully generated !"})
+    # except Exception as e:
+    #     print(f"Error: {e}")
+    #     with request_in_progress_lock:
+    #         request_in_progress[available_thread_index] = False
+    #     return jsonify({'message': str(e),"statu": False})
 
 
 
@@ -661,7 +661,7 @@ if __name__ == '__main__':
     # server = pywsgi.WSGIServer(('0.0.0.0', 443), app, ssl_context=context)
     # server.serve_forever()
 
-    app.run(host="0.0.0.0", port=443)
+    # app.run(host="0.0.0.0", port=443)
     app.run(host="0.0.0.0", port=443,ssl_context=(
         "server/server-cert.crt",
         "server/server-key.key")

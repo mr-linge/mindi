@@ -1,6 +1,9 @@
 import httpx
 import json
 
+import requests
+
+
 class Sender:
 
     def __init__(self, 
@@ -33,7 +36,7 @@ class Sender:
         
     def send(self, prompt):
         header = {
-            'authorization': self.authorization
+            'authorization': self.authorization,
         }
         payload = {'type': 2,
         'application_id': self.application_id,
@@ -46,20 +49,18 @@ class Sender:
             'name': 'imagine',
             'type': 1,
             'options': [{'type': 3, 'name': 'prompt', 'value': str(prompt) + ' ' + self.flags[self.flag]}],
-            'attachments': []}
+            'attachments': [],
+                }
             }
-        
-        r = httpx.post('https://discord.com/api/v9/interactions', json = payload , headers = header,timeout=self.timeout)
 
-        print(r.status_code)
+        response = requests.post('https://discord.com/api/v9/interactions', headers=header, json=payload, verify=False)
 
-        while r.status_code != 204:
+        print(response.status_code)
 
-            r = httpx.post('https://discord.com/api/v9/interactions', json = payload , headers = header,timeout=self.timeout)
+        while response.status_code != 204:
+
+            response = requests.post('https://discord.com/api/v9/interactions', json=payload, headers=header,verify=False)
 
         # print(r.text)
 
         print('prompt [{}] successfully sent!'.format(prompt))
-
-
-
