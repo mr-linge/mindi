@@ -2,7 +2,8 @@ import httpx
 import json
 
 import requests
-
+import urllib3
+urllib3.disable_warnings()
 
 class Sender:
 
@@ -37,6 +38,7 @@ class Sender:
     def send(self, prompt):
         header = {
             'authorization': self.authorization,
+            'Connection': 'close'
         }
         payload = {'type': 2,
         'application_id': self.application_id,
@@ -52,7 +54,6 @@ class Sender:
             'attachments': [],
                 }
             }
-
         response = requests.post('https://discord.com/api/v9/interactions', headers=header, json=payload, verify=False)
 
         print(response.status_code)
