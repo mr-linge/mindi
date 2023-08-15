@@ -661,10 +661,10 @@ if __name__ == '__main__':
     # server = pywsgi.WSGIServer(('0.0.0.0', 443), app, ssl_context=context)
     # server.serve_forever()
 
-    # app.run(host="0.0.0.0", port=443)
-    app.run(host="0.0.0.0", port=443,ssl_context=(
-        "server/server-cert.crt",
-        "server/server-key.key")
-    )
+    app.run(host="0.0.0.0", port=80)
+    # app.run(host="0.0.0.0", port=443,ssl_context=(
+    #     "server/server-cert.crt",
+    #     "server/server-key.key")
+    # )
 
 
