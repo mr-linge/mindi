@@ -290,7 +290,7 @@ def api():
     request_in_progress[available_thread_index] = True
 
     try:
-        from pygtrans import Translate
+        # from pygtrans import Translate
         from mtranslate import translate
         text = translate(question, 'en')
     # text = question
